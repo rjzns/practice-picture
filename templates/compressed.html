@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Сжатые файлы</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Сжатые файлы</h1>
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% else %}
+    {% if compressed_files %}
+    <ul>
+        {% for file_path in compressed_files %}
+        <li>{{ file_path }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No files were compressed.</p>
+    {% endif %}
+    {% endif %}
+</body>
+</html>
