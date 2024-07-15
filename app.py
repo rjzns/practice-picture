@@ -5,7 +5,6 @@ import os
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'file_search'
-app.config['COMPRESSED_FOLDER'] = 'compressed_images'
 
 # Поддерживаемые форматы файлов
 SUPPORTED_FORMATS = ['.png', '.jpeg', '.jpg', '.pdf']
@@ -38,15 +37,6 @@ def compress_files():
         compressed_files = []
         error = None
 
-        # Создание папки для сжатых файлов, если её нет
-        compressed_folder = app.config['COMPRESSED_FOLDER']
-        if not os.path.exists(compressed_folder):
-            try:
-                os.makedirs(compressed_folder)
-            except OSError:
-                error = f"Не удалось создать папку {compressed_folder}"
-                return render_template('index.html', error=error)
-
         # Функция для сжатия изображения с изменением размера
         def compress_image(file_path, output_path, quality=50):
             with Image.open(file_path) as img:
@@ -62,9 +52,7 @@ def compress_files():
 
                 for page_num in range(len(reader.pages)):
                     page = reader.pages[page_num]
-                    page.compress_content_streams() 
-
-
+                    page.compress_content_streams()
                     writer.add_page(page)
 
                 with open(output_path, 'wb') as f_out:
@@ -74,21 +62,23 @@ def compress_files():
         for file in files:
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], file)
             file_ext = os.path.splitext(file)[1].lower()
+            original_file_path = os.path.join(app.config['UPLOAD_FOLDER'], f'_ориг_{file}')
 
             if file_ext in SUPPORTED_FORMATS:
-                # Путь для сохранения сжатого файла
-                output_path = os.path.join(compressed_folder, f'compressed_{file}')
-
                 try:
+                    # Переименование оригинального файла
+                    os.rename(file_path, original_file_path)
+
+                    # Сжатие файла
                     if file_ext == '.pdf':
-                        compress_pdf(file_path, output_path)
+                        compress_pdf(original_file_path, file_path)
                     else:
-                        compress_image(file_path, output_path)
+                        compress_image(original_file_path, file_path)
                 except Exception as e:
                     error = f"Ошибка при сжатии файла {file}: {str(e)}"
                     break
                 else:
-                    compressed_files.append(output_path)
+                    compressed_files.append(file_path)
 
         # Отображение списка сжатых файлов или сообщения об ошибке
         if error:
