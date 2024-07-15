@@ -62,7 +62,7 @@ def compress_files():
         for file in files:
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], file)
             file_ext = os.path.splitext(file)[1].lower()
-            original_file_path = os.path.join(app.config['UPLOAD_FOLDER'], f'_ориг_{file}')
+            original_file_path = os.path.join(app.config['UPLOAD_FOLDER'], f'_orig_{file}')
 
             if file_ext in SUPPORTED_FORMATS:
                 try:
